@@ -18,8 +18,13 @@ GAME_HEIGHT = 5
 class Rock(GameElement):
     IMAGE = "Rock"
     SOLID = True
+
 class Character(GameElement):
     IMAGE = "Girl"
+
+    def __init__(self):
+        GameElement.__init__(self)
+        self.inventory = []
 
     def next_pos(self, direction):
         if direction == "up":
@@ -31,6 +36,14 @@ class Character(GameElement):
         elif direction == "right":
             return (self.x+1, self.y)
         return None
+
+class Gem(GameElement):
+    IMAGE = "BlueGem"
+    SOLID = False
+
+    def interact(self, player):
+        player.inventory.append(self)
+        GAME_BOARD.draw_msg("You just acquired a gem! You have %d items!" % (len(player.inventory)))
 
 
 
@@ -54,8 +67,11 @@ def keyboard_handler():
 
         existing_el = GAME_BOARD.get_el(next_x, next_y)
 
+        if existing_el:
+            existing_el.interact(PLAYER)
+
         if existing_el is None or not existing_el.SOLID:
-            # only walks through if there is nothing there or non-solid element
+
             GAME_BOARD.del_el(PLAYER.x, PLAYER.y)
             GAME_BOARD.set_el(next_x, next_y, PLAYER)
 
@@ -82,6 +98,9 @@ def initialize():
     for rock in rocks:
         print rock
 
+    gem = Gem()
+    GAME_BOARD.register(gem)
+    GAME_BOARD.set_el(3, 1, gem)
 
     global PLAYER
     PLAYER = Character()
