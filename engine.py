@@ -4,8 +4,8 @@ import pyglet
 from pyglet.window import key
 from core import GameElement
 
-SCREEN_X = 800
-SCREEN_Y = 700
+SCREEN_X = 1300
+SCREEN_Y = 900
 
 game_window = pyglet.window.Window(SCREEN_X, SCREEN_Y)
 
@@ -54,7 +54,7 @@ def setup_images():
     TILE_HEIGHT = i.height
 
 class Board(object):
-    def __init__(self, width = 3, height = 3):
+    def __init__(self, width = 3, height = 3, boardtype = "standard"):
         self.width = width
         self.height = height
 
@@ -69,14 +69,20 @@ class Board(object):
 
         # Make a map with a stoneblock border and filled with grass
         game_map = []
-        inner_width = width-2
-        for i in range(height):
-            if i == 0 or i == height-1:
-                # On the boundaries
-                game_map.append(["Block"] * width)
-            else:
-                row = ["Block"] + (["GrassBlock"] * inner_width) + ["Block"]
+
+        if boardtype == "crossword":
+            for i in range(height):
+                row = ["Block"] * width
                 game_map.append(row)
+        else:
+            inner_width = width-2
+            for i in range(height):
+                if i == 0 or i == height-1:
+                    # On the boundaries
+                    game_map.append(["Block"] * width)
+                else:
+                    row = ["Block"] + (["GrassBlock"] * inner_width) + ["Block"]
+                    game_map.append(row)
         
         self.base_board = game_map
         self.content_layer = []
@@ -125,23 +131,27 @@ class Board(object):
 
     def check_bounds(self, x, y):
         if not (0 <= x < self.width):
-            raise IndexError("%r is out of bounds of the board width: %d"%(x, self.width))
-        if not (0 <= y < self.height):
-            raise IndexError("%r is out of bounds of the board height: %d"%(y, self.width))
+            return False
+            # raise IndexError("%r is out of bounds of the board width: %d"%(x, self.width))
+        elif not (0 <= y < self.height):
+            return False
+            # raise IndexError("%r is out of bounds of the board height: %d"%(y, self.width))
+        else:
+            return True
 
     def get_el(self, x, y):
-        self.check_bounds(x, y)
-        return self.content_layer[y][x]
+        if self.check_bounds(x, y):
+            return self.content_layer[y][x]
 
     def set_el(self, x, y, el):
-        self.check_bounds(x, y)
-        el.x = x
-        el.y = y
-        self.content_layer[y][x] = el
+        if self.check_bounds(x, y):
+            el.x = x
+            el.y = y
+            self.content_layer[y][x] = el
 
     def del_el(self, x, y):
-        self.check_bounds(x, y)
-        self.content_layer[y][x] = None
+        if self.check_bounds(x, y):
+            self.content_layer[y][x] = None
 
     def register(self, el):
         image_file = IMAGES[el.IMAGE]
@@ -183,17 +193,23 @@ def on_draw():
     for el in draw_list:
         el.draw()
 
-def run():
+def run(level):
     # Attempt to use custom board 
     global board
+    # global board2
     global player
     setup_images()
     try:
         board = Board(game.GAME_WIDTH, game.GAME_HEIGHT)
+        board2 = Board(game.GAME_WIDTH, game.GAME_HEIGHT, "crossword")
     except (AttributeError) as e:
         board = Board()
+        board2 = Board()
         
-    game.GAME_BOARD = board
+    if level == 1:
+        game.GAME_BOARD = board
+    elif level == 2:
+        game.GAME_BOARD = board2
 
     """
     try:
@@ -213,7 +229,7 @@ def run():
         pass
 
     # Add the board and the fps display to the draw list
-    draw_list.append(board)
+    draw_list.append(game.GAME_BOARD)
 
     # Add the keyboard handler if it's ready
     key_handler = key.KeyStateHandler()
@@ -231,8 +247,9 @@ def run():
         
     # Set up the update clock
     pyglet.clock.schedule_interval(update, 1/10.)
-    game.initialize()
+    game.initialize(game.level_1)
     pyglet.app.run()
+
 
 class UpdateWrapper(object):
     def __init__(self, fn):
@@ -241,4 +258,4 @@ class UpdateWrapper(object):
         self.fn()
 
 if __name__ == "__main__":
-    run()
+    run(2)
