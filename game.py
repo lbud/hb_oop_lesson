@@ -13,6 +13,7 @@ PLAYER = None
 
 GAME_WIDTH = 12
 GAME_HEIGHT = 7
+LEVEL = 1
 
 #### Put class definitions here ####
 class Rock(GameElement):
@@ -39,7 +40,9 @@ class DoorOpen(GameElement):
     SOLID = True
 
     def interact(self, player):
-        pass
+        nextlevel = True
+        GAME_BOARD.draw_msg("I'm trying to go to the next level helllllp")
+        initializenext()
 
 class DoorClosed(GameElement):
     IMAGE = "DoorClosed"
@@ -134,17 +137,6 @@ def key_appears(keyx, keyy):
 
 
 def initialize():
-    """Put game initialization code here"""
-    rock_positions = [
-            
-        ]
-    rocks = []
-
-    for pos in rock_positions:
-        rock = Rock()
-        GAME_BOARD.register(rock)
-        GAME_BOARD.set_el(pos[0], pos[1], rock)
-        rocks.append(rock)
 
     wall_positions = [
             (0, 5),
@@ -209,3 +201,11 @@ def initialize():
 
 
     GAME_BOARD.draw_msg("This game is wicked awesome.")
+
+
+def initializenext():
+    for y in range(height):
+        for x in range(width):
+            if GAME_BOARD.get_el(x, y):
+                GAME_BOARD.del_el(x, y)
+    LEVEL = 2
