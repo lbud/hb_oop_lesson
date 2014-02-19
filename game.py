@@ -3,6 +3,7 @@ import pyglet
 from pyglet.window import key
 from core import GameElement
 import sys
+import string
 
 #### DO NOT TOUCH ####
 GAME_BOARD = None
@@ -13,7 +14,12 @@ PLAYER = None
 
 GAME_WIDTH = 12
 GAME_HEIGHT = 7
-LEVEL = 1
+
+######################
+
+f1 = open("level1.txt")
+l1 = [line.strip('\n') for line in f1.readlines()]
+
 
 ###########################
 #### CLASS DEFINITIONS ####
@@ -50,11 +56,12 @@ class DoorOpen(SolidThings):
     IMAGE = "DoorOpen"
 
     def interact(self, player):
-        nextlevel = True
-        GAME_BOARD.draw_msg("I'm trying to go to the next level helllllp")
-        initializenext()
+        GAME_BOARD.draw_msg("On to da next one")
+        initializesecond()
 
 
+class TallTree(SolidThings):
+    IMAGE = "TallTree"
 
 
 #### Parent class: collectible things
@@ -126,7 +133,36 @@ class Character(GameElement):
 
 
 ####   End class definitions    ####
-####   mini-functions:          ####
+####   boardmaking functions:   ####
+
+def get_level(filename):
+    f = open(filename)
+    return [string.upper(line.strip('\n')) for line in f.readlines()]
+    f.close()
+
+def make_level(level):
+    gamesetup = {"wall_positions": [], "gem_positions": [], "door_positions": [], "open_door_positions": [], "tree_positions": [], "player_position": []}
+    lineno = 0
+    for line in level:
+        charno = 0
+        for char in line:
+            if char == "#":
+                pass
+            elif char == "W":
+                gamesetup.get("wall_positions").append((charno, lineno))
+            elif char == "G":
+                gamesetup.get("gem_positions").append((charno, lineno))
+            elif char == "P":
+                gamesetup.get("player_position").append((charno, lineno))
+            elif char == "D":
+                gamesetup.get("door_positions").append((charno, lineno))
+            elif char == "O":
+                gamesetup.get("open_door_positions").append((charno, lineno))
+            elif char == "T":
+                gamesetup.get("tree_positions").append((charno, lineno))
+            charno += 1
+        lineno += 1
+    return gamesetup
 
 def open_door(doorx, doory):
     opendoor = DoorOpen()
@@ -146,57 +182,12 @@ def key_appears(keyx, keyy):
 ####   End mini-functions       ####
 ####   Level setup:             ####
 
-level_1 = {
-    "wall_positions": [
-            (0, 5),
-            (1, 0),
-            (1, 1),
-            (1, 3),
-            (1, 5),
-            (2, 0),
-            (2, 3),
-            (2, 5),
-            (3, 0),
-            (3, 1),
-            (3, 2),
-            (3, 3),
-            (3, 5),
-            (5, 1),
-            (5, 2),
-            (5, 3),
-            (5, 5),
-            (5, 6),
-            (6, 5),
-            (7, 1),
-            (7, 5),
-            (8, 1),
-            (8, 2),
-            (8, 3),
-            (8, 4),
-            (8, 5),
-            (9, 1),
-            (9, 3),
-            (9, 4)
-        ],
-    "gem_positions": [
-            (0, 6),
-            (7, 2),
-            (7, 6),
-            (9, 2)            
-        ],
-    "door_positions": [
-            (10, 1)
-        ]
-    }
+l1 = get_level("level1.txt")
+level_1 = make_level(l1)
 
-level_2 = {
-    "wall_positions": [
-        ],
-    "gem_positions": [
-        ],
-    "door_positions": [
-        ]
-    }   
+l2 = get_level("level2.txt")
+level_2 = make_level(l2)
+
 
 
 
@@ -256,19 +247,28 @@ def initialize(level):
         GAME_BOARD.register(doorclosed)
         GAME_BOARD.set_el(pos[0], pos[1], doorclosed)
 
+    for pos in level.get("open_door_positions"):
+        dooropen = DoorOpen()
+        GAME_BOARD.register(dooropen)
+        GAME_BOARD.set_el(pos[0], pos[1], dooropen)
+
+    for pos in level.get("tree_positions"):
+        talltree = TallTree()
+        GAME_BOARD.register(talltree)
+        GAME_BOARD.set_el(pos[0], pos[1], talltree)
+
     global PLAYER
     PLAYER = Character()
     GAME_BOARD.register(PLAYER)
-    GAME_BOARD.set_el(10, 5, PLAYER)
+    GAME_BOARD.set_el(level.get("player_position")[0][0], level.get("player_position")[0][1], PLAYER)
     print PLAYER
 
-
-    GAME_BOARD.draw_msg("This game is wicked awesome.")
-
-
-def initializenext():
+def initializesecond():
     for y in range(GAME_HEIGHT):
         for x in range(GAME_WIDTH):
             if GAME_BOARD.get_el(x, y):
                 GAME_BOARD.del_el(x, y)
     initialize(level_2)
+    current_level = 2
+    print current_level
+    return current_level
