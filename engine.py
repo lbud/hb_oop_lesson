@@ -29,6 +29,7 @@ def setup_images():
             "TallTree": "Tree Tall.png",
             "Rock": "Rock.png",
             "Chest": "Chest Closed.png",
+            "ChestOpen": "Chest Open.png",
             "DoorClosed": "Door Tall Closed.png",
             "DoorOpen": "Door Tall Open.png",
             "BlueGem": "Gem Blue.png",
@@ -247,7 +248,7 @@ def run(level):
         
     # Set up the update clock
     pyglet.clock.schedule_interval(update, 1/10.)
-    game.initialize(game.level_1)
+    game.initialize(game.level_1, 1)
     pyglet.app.run()
 
 

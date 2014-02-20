@@ -1,7 +1,7 @@
-#WWW########
+#WWWC#######
 #W#W#W#WWWD#
-###W#W#GWG##
+###W#W#GWGp#
 #WWW#W##WW##
 ########WW##
-WWWW#WWWW#P#
+WWWW#WWWW###
 G####W#G####
