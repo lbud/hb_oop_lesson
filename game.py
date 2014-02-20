@@ -35,8 +35,10 @@ class Rock(SolidThings):
 class Wall(SolidThings):
     IMAGE = "Wall"
 
+
 class ChestOpen(SolidThings):
     IMAGE = "ChestOpen"
+
 
 class DoorClosed(SolidThings):
     IMAGE = "DoorClosed"
@@ -62,7 +64,7 @@ class DoorOpen(SolidThings):
         global levelid
 
         if levelid == 2:
-            GAME_BOARD.draw_msg("On to da next one")
+            GAME_BOARD.draw_msg("Back to da first one")
             initializesecond(level_1, 1)
             levelid = 1
         else:
@@ -112,7 +114,6 @@ class Secret(TallTree):
 
 
 
-
 #### Parent class: collectible things
 
 class Collectible(GameElement):
@@ -145,8 +146,6 @@ class Collectible(GameElement):
             level_1.get("gem_positions").pop()
 
 
-
-
 class Key(Collectible):
     def __init__(self):
         super(Key, self).__init__("key", "This will probably come in handy sometime.")
@@ -157,6 +156,7 @@ class Gem(Collectible):
     IMAGE = "BlueGem"
     def __init__(self):
         super(Gem, self).__init__("gem", "Are there any more around here?")
+
 
 
 #### player
@@ -180,8 +180,6 @@ class Character(GameElement):
 
     def last_pos(self):
         return (self.x, self.y)     
-
-
 
 
 
@@ -220,8 +218,6 @@ def make_level(level):
                 gamesetup.get("chest_positions").append((charno, lineno))
             elif char == "R":
                 gamesetup.get("rock_positions").append((charno, lineno))
-            # elif char == "S":
-            #     gamesetup.get("secret_positions").append((charno, lineno))
             charno += 1
         lineno += 1
     return gamesetup
@@ -231,6 +227,7 @@ def open_door(doorx, doory):
     opendoor = DoorOpen()
     GAME_BOARD.register(opendoor)
     GAME_BOARD.set_el(doorx, doory, opendoor)
+
 
 def open_chest(chestx, chesty):
     openchest = ChestOpen()
@@ -253,10 +250,10 @@ def key_appears(keyx, keyy):
 
 l1 = get_level("level1.txt") ## list of strings
 level_1 = make_level(l1)  ## dictionary of stuff
-print level_1
 
 l2 = get_level("level2.txt")
 level_2 = make_level(l2)
+
 
 inventory = []
 global levelid
@@ -301,6 +298,7 @@ def keyboard_handler():
 
             GAME_BOARD.del_el(PLAYER.x, PLAYER.y)
 
+            # check to see if last element player walked through was a tree; replace tree:
             if wastree:
                 tree = TallTree()
                 GAME_BOARD.register(tree)
@@ -308,7 +306,8 @@ def keyboard_handler():
                 wastree = False
 
             GAME_BOARD.set_el(next_x, next_y, PLAYER)
-       
+
+            # set wastree to remember if we need to replace a tree next move       
             if existing_el:
                 if existing_el.REPLACE:
                     wastree = True
@@ -323,14 +322,19 @@ def keyboard_handler():
 
 def initialize(level, levelid):
 
+    if levelid == 2:
+        GAME_BOARD.draw_msg("A forest! Maybe there's something hidden around here...")
+
+
     global wastree
     wastree = False
-    print wastree
+
 
     number_of_trees = len(level_2.get("tree_positions"))
     randx = randint(0, number_of_trees-1)
     popped = level_2.get("tree_positions").pop(randx)
     level_2.get("secret_positions").append(popped)
+
 
     for pos in level.get("wall_positions"):
         wall = Wall()
@@ -372,6 +376,7 @@ def initialize(level, levelid):
         GAME_BOARD.register(secret)
         GAME_BOARD.set_el(pos[0], pos[1], secret)
 
+
     global PLAYER
     PLAYER = Character()
     GAME_BOARD.register(PLAYER)
@@ -379,6 +384,7 @@ def initialize(level, levelid):
     print PLAYER
     print "Inventory:", inventory
     return levelid
+
 
 def initializesecond(level, levelid):
     for y in range(GAME_HEIGHT):
